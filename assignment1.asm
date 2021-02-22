@@ -9,6 +9,7 @@ nextXPrompt : .asciiz "\nEnter the next x-coordinate: "
 nextYPrompt : .asciiz "\nEnter the next y-coordinate: "
 endMessage : .asciiz "\nExecution Ending" 
 zero : .double 0.0
+two : .double 2.0
 
 # Code Section
 
@@ -84,41 +85,87 @@ computeLoop:
 
     # Perform some computation
 
-    sub     $a0,    $s3,    $s1                 # a0 = x1 - x0
-    add     $a1,    $s2,    $s4                 # a1 = y0+y1
+    # Move x1, x2 to floating point registers
+    # f4 => x1
+    mtc1 $s1, $f4
+    # f6 => x2
+    mtc1 $s3, $f6
+    # Convert representation from 32-bit integer to 64-bit floating point
+    cvt.d.w $f4, $f4
+    cvt.d.w $f6, $f6
+    # f4 => x2-x1
+    sub.d $f4, $f6, $f4
+    # f4 => (x2-x1)/2.0
+    l.d $f6, two
+    div.d $f4, $f4, $f6
 
-    mtc1    $a1,    $f2
-    mtc1    $a0,    $f0
-    mul.d   $f0,    $f2,    $f0                 # f0 = (x1 - x0) * (y0 + y1)
-    li      $t2,    2 
-    mtc1    $t2,    $f2
-    div.d   $f0,    $f0,   $f2                  # f0 = (x1 - x0) * (y0 + y1) /2
+    # Move y1, y2 to floating point registers
+    # f6 => y1
+    mtc1 $s2, $f6
+    #f8 => y2
+    mtc1 $s4, $f8
+    # Convert representation from 32-bit integer to 64-bit floating point
+    cvt.d.w $f6, $f6
+    cvt.d.w $f8, $f8
+
+    bgez $s2, y1_pos
     
-    mul     $t0,    $s2,    $s4
-    bgt     $t0,    $zero,  pos                 # branch to label 'pos' if $a1 is greater than zero
-                                                # if y0y1 > 0, jump directly to statement labelled pos
+    # y1<0 if this is executed
+    bgez $s4, neg_product
+
+    # y1<0, y2<0 if this is executed
+    j pos_product
+
+    y1_pos:
+    # y1>=0
+    bgez $s4, pos_product
+
+    # either y1<0 and y2>=0 or y1>=0 and y2<0
+    neg_product:
+    # f6 => absolute(y1)
+    abs.d $f6, $f6
+    # f8 => absolute(y2)
+    abs.d $f8, $f8
+
+    # Compute (y1^2 + y2^2)
+    # f10 => y1^2
+    mul.d $f10, $f6, $f6
+    # f16 => y2^2
+    mul.d $f16, $f8, $f8
+    # f10 => (y1^2+y2^2)
+    add.d $f10, $f10, $f16
+
+    # Compute (absolute(y1)+absolute(y2))
+    # f6 => (absolute(y1)+absolute(y2))
+    add.d $f6, $f6, $f8
+
+    # Compute (y1^2+y2^2)/(absolute(y1)+absolute(y2))
+    # f6 => (y1^2+y2^2)/(absolute(y1)+absolute(y2))
+    div.d $f6, $f10, $f6
+    j post_product_step
+
+    # either y1>=0 and y2>=0 or y1<0 and y2<0
+    pos_product:
+    # f6 => absolute(y1)
+    abs.d $f6, $f6
+    # f8 => absolute(y2)
+    abs.d $f8, $f8
+
+    # Compute (absolute(y1)+absolute(y2))
+    # f6 => (absolute(y1)+absolute(y2))
+    add.d $f6, $f6, $f8
+
+    post_product_step:
+    # Multiply f6 contents by (x2-x1)/2.0
+    # f6 => Area between points (x1,y1) and (x2,y2)
+    mul.d $f6, $f6, $f4
+
+    # Update the total area calculated till now
+    add.d $f20, $f20, $f6
     
-    mul     $t1,    $s4,    $s4
-    mul     $t2,    $s2,    $s2                 # handle case when y0y1<0
-    add     $t3,    $t2,    $t1
-    sub     $t4,    $s4,    $s2
-
-    div     $t0,    $t3,    $t4
-
-    mtc1    $t0,    $f2
-    mul.d   $f0,    $f2,    $f0
-
-                   
-
-pos:    
-    abs.d     $f0,    $f0
-    add.d   $f20,   $f20,   $f0                # f0 has current addition to the area, 
-                                                # a has total area uptill now
-
-    # Update area
     sub $s0, $s0, 1 # n <= n-1
 
-    # Move x2,y2 to x1,y1
+    # Move x2,y2 to x1,y1 if not(x1==x2 AND y1>y2)
     
     bne $s1, $s3, notEqualX
     bgt $s2, $s4, skipMove
@@ -141,6 +188,15 @@ outputZero:
     syscall
 
 terminate:
+    li $v0, 4
+    la $a0, ansPrompt
+    syscall
+    
+    # Printing out area
+    li $v0, 3
+    mov.d $f12, $f20
+    syscall
+
     li $v0, 4
     la $a0, endMessage
     syscall
