@@ -84,19 +84,20 @@ computeLoop:
 
     # Perform some computation
 
-    sub     $a0,    $s3,    $s1                 # f0 = x1 - x0
-    add     $a1,    $s2,    $s2                 # a1 = y0+y1
+    sub     $a0,    $s3,    $s1                 # a0 = x1 - x0
+    add     $a1,    $s2,    $s4                 # a1 = y0+y1
 
-    mtc1    $a1, $f2
-    mtc1    $a0, $f0
+    mtc1    $a1,    $f2
+    mtc1    $a0,    $f0
     mul.d   $f0,    $f2,    $f0                 # f0 = (x1 - x0) * (y0 + y1)
-    li      $t2, 2 
-    mtc1    $t2, $f2
-    div.d   $f0,    $f0,   $f2                  # f0 = (x1 - x0) * (y0 + y1) 
+    li      $t2,    2 
+    mtc1    $t2,    $f2
+    div.d   $f0,    $f0,   $f2                  # f0 = (x1 - x0) * (y0 + y1) /2
     
     mul     $t0,    $s2,    $s4
     bgt     $t0,    $zero,  pos                 # branch to label 'pos' if $a1 is greater than zero
                                                 # if y0y1 > 0, jump directly to statement labelled pos
+    
     mul     $t1,    $s4,    $s4
     mul     $t2,    $s2,    $s2                 # handle case when y0y1<0
     add     $t3,    $t2,    $t1
@@ -104,12 +105,13 @@ computeLoop:
 
     div     $t0,    $t3,    $t4
 
-    mtc1    $t0, $f2
+    mtc1    $t0,    $f2
     mul.d   $f0,    $f2,    $f0
 
                    
 
 pos:    
+    abs.d     $f0,    $f0
     add.d   $f20,   $f20,   $f0                # f0 has current addition to the area, 
                                                 # a has total area uptill now
 
