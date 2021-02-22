@@ -7,7 +7,7 @@ firstXPrompt : .asciiz "\nEnter the first x-coordinate: "
 firstYPrompt : .asciiz "\nEnter the first y-coordinate: "
 nextXPrompt : .asciiz "\nEnter the next x-coordinate: "
 nextYPrompt : .asciiz "\nEnter the next y-coordinate: "
-endMessage : .asciiz "\nExecution Ending"
+endMessage : .asciiz "\nExecution Ending" 
 zero : .double 0.0
 
 # Code Section
@@ -15,6 +15,13 @@ zero : .double 0.0
 .text
 .globl main
 .ent main
+
+
+# n is stored in $s0
+# last x is stored in $s1
+# last y is stored in $s2
+# new x is stored in $s3
+# new y is stored in $s4
 
 main:
     # Display Prompt for n
@@ -76,6 +83,37 @@ computeLoop:
     move $s4, $v0
 
     # Perform some computation
+
+    sub     $a0,    $s3,    $s1                 # a0 = x1 - x0
+    add     $a1,    $s2,    $s4                 # a1 = y0+y1
+
+    mtc1    $a1,    $f2
+    mtc1    $a0,    $f0
+    mul.d   $f0,    $f2,    $f0                 # f0 = (x1 - x0) * (y0 + y1)
+    li      $t2,    2 
+    mtc1    $t2,    $f2
+    div.d   $f0,    $f0,   $f2                  # f0 = (x1 - x0) * (y0 + y1) /2
+    
+    mul     $t0,    $s2,    $s4
+    bgt     $t0,    $zero,  pos                 # branch to label 'pos' if $a1 is greater than zero
+                                                # if y0y1 > 0, jump directly to statement labelled pos
+    
+    mul     $t1,    $s4,    $s4
+    mul     $t2,    $s2,    $s2                 # handle case when y0y1<0
+    add     $t3,    $t2,    $t1
+    sub     $t4,    $s4,    $s2
+
+    div     $t0,    $t3,    $t4
+
+    mtc1    $t0,    $f2
+    mul.d   $f0,    $f2,    $f0
+
+                   
+
+pos:    
+    abs.d     $f0,    $f0
+    add.d   $f20,   $f20,   $f0                # f0 has current addition to the area, 
+                                                # a has total area uptill now
 
     # Update area
     sub $s0, $s0, 1 # n <= n-1
