@@ -192,10 +192,11 @@ terminate:
     la $a0, ansPrompt
     syscall
     
+    # Printing out area
     li $v0, 3
     mov.d $f12, $f20
     syscall
-    
+
     li $v0, 4
     la $a0, endMessage
     syscall
