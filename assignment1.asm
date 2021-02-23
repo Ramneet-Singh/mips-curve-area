@@ -33,12 +33,34 @@ main:
     la $a0, numPrompt
     syscall
 
-    # Store user input as n
-    li $v0, 5
+    #Store as a string
+    li $v0, 8
+    la $a0, theString
+    li $a1, 64
     syscall
+    li $a2, 0
+    li $t0, 10
 
+    #parse the string and convert to integer
+    lbu $t1, ($a0)
+    beq $t1, $t0, error
+
+lp_n:         
+    lbu $t1, ($a0)       
+    beq $t1, $t0, n_read_complete  #NULL terminator found
+    blt $t1, 48, error   
+    bgt $t1, 57, error   
+    addi $t1, $t1, -48   
+    mul $a2, $a2, $t0    
+    add $a2, $a2, $t1    
+    addi $a0, $a0, 1     
+    j lp_n             
+    
+    
+
+n_read_complete:
     # Save value of n to preserve through loop
-    move $s0, $v0
+    move $s0, $a2
 
     # If n<=1, output zero
     li $t0, 1 # store 1
