@@ -278,16 +278,10 @@ y_read_complete:
     
     sub $s0, $s0, 1 # n <= n-1
 
-    # Move x2,y2 to x1,y1 if not(x1==x2 AND y1>y2)
-    
-    bne $s1, $s3, notEqualX
-    bgt $s2, $s4, skipMove
-    
-    notEqualX:
+    # Move x2,y2 to x1,y1 
     move $s1, $s3
     move $s2, $s4
     
-    skipMove:
     bgtz $s0, computeLoop 
     j terminate
 
