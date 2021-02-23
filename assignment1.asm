@@ -216,7 +216,7 @@ x_read_positive:
     li $t6, 0
     bne $t1, $t7, lp_y
     addi $a0, $a0, 1 
-    li $t6, 0
+    li $t6, 1
 lp_y:         
     lbu $t1, ($a0)       
     beq $t1, $t0, y_read_complete  #NULL terminator found
