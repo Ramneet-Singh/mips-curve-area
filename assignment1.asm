@@ -1,13 +1,16 @@
 # Data Declarations
 
 .data
+theString: .space 64
 numPrompt : .asciiz "\nEnter the number of coordinates: "
 ansPrompt : .asciiz "\nArea under the curve: "
 firstXPrompt : .asciiz "\nEnter the first x-coordinate: "
 firstYPrompt : .asciiz "\nEnter the first y-coordinate: "
 nextXPrompt : .asciiz "\nEnter the next x-coordinate: "
 nextYPrompt : .asciiz "\nEnter the next y-coordinate: "
-endMessage : .asciiz "\nExecution Ending" 
+endMessage : .asciiz "\nExecution Ending \n" 
+inputErrorMessage : .asciiz "\nError: Please input an integer\n" 
+
 zero : .double 0.0
 two : .double 2.0
 
@@ -48,21 +51,67 @@ main:
     la $a0, firstXPrompt
     syscall
 
-    li $v0, 5
+    #Store as a string
+    li $v0, 8
+    la $a0, theString
+    li $a1, 64
     syscall
-    move $s1, $v0
+    li $a2, 0
+    li $t0, 10
+
+    #parse the string and convert to integer
+    lbu $t1, ($a0)
+    beq $t1, $t0, error
+
+lp_f_x:         
+    lbu $t1, ($a0)       
+    beq $t1, $t0, x_f_read_complete  #NULL terminator found
+    blt $t1, 48, error   
+    bgt $t1, 57, error   
+    addi $t1, $t1, -48   
+    mul $a2, $a2, $t0    
+    add $a2, $a2, $t1    
+    addi $a0, $a0, 1     
+    j lp_f_x             
+    
+    
+
+x_f_read_complete:
+    move $s1, $a2
 
     # Enter first y-coordinate:
     li $v0, 4
     la $a0, firstYPrompt
     syscall
 
-    li $v0, 5
+    #Store as a string
+    li $v0, 8
+    la $a0, theString
+    li $a1, 64
     syscall
-    move $s2, $v0
+    li $a2, 0
+    li $t0, 10
+
+    #parse the string and convert to integer
+    lbu $t1, ($a0)
+    beq $t1, $t0, error
+lp_f_y:         
+    lbu $t1, ($a0)       
+    beq $t1, $t0, y_f_read_complete  #NULL terminator found
+    blt $t1, 48, error   
+    bgt $t1, 57, error   
+    addi $t1, $t1, -48   
+    mul $a2, $a2, $t0    
+    add $a2, $a2, $t1    
+    addi $a0, $a0, 1     
+    j lp_f_y   
+
+y_f_read_complete:
+    move $s2, $a2
 
     sub $s0, $s0, 1 # n <= n-1
     l.d $f20, zero # Initialize area to 0
+
 
 computeLoop:
     # Enter next x-coordinate:
@@ -70,18 +119,60 @@ computeLoop:
     la $a0, nextXPrompt
     syscall
 
-    li $v0, 5
+    #Store as a string
+    li $v0, 8
+    la $a0, theString
+    li $a1, 64
     syscall
-    move $s3, $v0
+    li $a2, 0
+    li $t0, 10
+
+    #parse the string and convert to integer
+    lbu $t1, ($a0)
+    beq $t1, $t0, error
+lp_x:         
+    lbu $t1, ($a0)       
+    beq $t1, $t0, x_read_complete  #NULL terminator found
+    blt $t1, 48, error   
+    bgt $t1, 57, error   
+    addi $t1, $t1, -48   
+    mul $a2, $a2, $t0    
+    add $a2, $a2, $t1    
+    addi $a0, $a0, 1     
+    j lp_x  
+
+x_read_complete:
+    move $s3, $a2
 
     # Enter next y-coordinate:
     li $v0, 4
     la $a0, nextYPrompt
     syscall
 
-    li $v0, 5
+    #Store as a string
+    li $v0, 8
+    la $a0, theString
+    li $a1, 64
     syscall
-    move $s4, $v0
+    li $a2, 0
+    li $t0, 10
+
+    #parse the string and convert to integer
+    lbu $t1, ($a0)
+    beq $t1, $t0, error
+lp_y:         
+    lbu $t1, ($a0)       
+    beq $t1, $t0, y_read_complete  #NULL terminator found
+    blt $t1, 48, error   
+    bgt $t1, 57, error   
+    addi $t1, $t1, -48   
+    mul $a2, $a2, $t0    
+    add $a2, $a2, $t1    
+    addi $a0, $a0, 1     
+    j lp_y  
+
+y_read_complete:
+    move $s4, $a2
 
     # Perform some computation
 
@@ -199,6 +290,13 @@ terminate:
 
     li $v0, 4
     la $a0, endMessage
+    syscall
+    li $v0, 10
+    syscall
+
+error: 
+    li $v0, 4
+    la $a0, inputErrorMessage
     syscall
     li $v0, 10
     syscall
