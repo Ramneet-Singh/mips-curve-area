@@ -9,7 +9,8 @@ firstYPrompt : .asciiz "\nEnter the first y-coordinate: "
 nextXPrompt : .asciiz "\nEnter the next x-coordinate: "
 nextYPrompt : .asciiz "\nEnter the next y-coordinate: "
 endMessage : .asciiz "\nExecution Ending \n" 
-inputErrorMessage : .asciiz "\nError: Please input an integer\n" 
+inputErrorMessage : .asciiz "\nError: Please input an integer\n"
+numErrorMessage : .asciiz "\nError: The number of coordinates must be greater than 0. Zero points do not define any curve.\n" 
 
 zero : .double 0.0
 two : .double 2.0
@@ -64,7 +65,8 @@ n_read_complete:
 
     # If n<=1, output zero
     li $t0, 1 # store 1
-    ble		$s0, $t0, outputZero	# if n <= 1 then output zero
+    blt		$s0, $t0, numError	# if n < 1 then output an error (invalid input)
+    beq     $s0, $t0, outputZero    # if n=1 then output zero
 
     # Register Mapping: n => s0, x1 => s1, y1 => s2, x2 => s3, y2 => s4, area => f20-f21
     
@@ -313,6 +315,13 @@ terminate:
 error: 
     li $v0, 4
     la $a0, inputErrorMessage
+    syscall
+    li $v0, 10
+    syscall
+
+numError:
+    li $v0, 4
+    la $a0, numErrorMessage
     syscall
     li $v0, 10
     syscall
