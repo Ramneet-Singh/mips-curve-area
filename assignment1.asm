@@ -41,10 +41,15 @@ main:
     syscall
     li $a2, 0
     li $t0, 10
+    li $t7, 45
 
     #parse the string and convert to integer
     lbu $t1, ($a0)
     beq $t1, $t0, error
+    li $t6, 0
+    bne $t1, $t7, lp_n
+    addi $a0, $a0, 1 
+    li $t6, 1
 
 lp_n:         
     lbu $t1, ($a0)       
@@ -62,6 +67,9 @@ lp_n:
 n_read_complete:
     # Save value of n to preserve through loop
     move $s0, $a2
+    beq $t6, $zero, n_read_positive
+    sub $s0, $zero, $s0
+n_read_positive:
 
     # If n<=1, output zero
     li $t0, 1 # store 1
@@ -86,6 +94,10 @@ n_read_complete:
     #parse the string and convert to integer
     lbu $t1, ($a0)
     beq $t1, $t0, error
+    li $t6, 0
+    bne $t1, $t7, lp_f_x
+    addi $a0, $a0, 1 
+    li $t6, 1
 
 lp_f_x:         
     lbu $t1, ($a0)       
@@ -102,6 +114,9 @@ lp_f_x:
 
 x_f_read_complete:
     move $s1, $a2
+    beq $t6, $zero, x_f_read_positive
+    sub $s1, $zero, $s1
+x_f_read_positive:
 
     # Enter first y-coordinate:
     li $v0, 4
@@ -119,6 +134,10 @@ x_f_read_complete:
     #parse the string and convert to integer
     lbu $t1, ($a0)
     beq $t1, $t0, error
+    li $t6, 0
+    bne $t1, $t7, lp_f_y
+    addi $a0, $a0, 1 
+    li $t6, 1
 lp_f_y:         
     lbu $t1, ($a0)       
     beq $t1, $t0, y_f_read_complete  #NULL terminator found
@@ -132,6 +151,9 @@ lp_f_y:
 
 y_f_read_complete:
     move $s2, $a2
+    beq $t6, $zero, y_f_read_positive
+    sub $s2, $zero, $s2
+y_f_read_positive:
 
     sub $s0, $s0, 1 # n <= n-1
     l.d $f20, zero # Initialize area to 0
@@ -154,6 +176,10 @@ computeLoop:
     #parse the string and convert to integer
     lbu $t1, ($a0)
     beq $t1, $t0, error
+    li $t6, 0
+    bne $t1, $t7, lp_x
+    addi $a0, $a0, 1 
+    li $t6, 1
 lp_x:         
     lbu $t1, ($a0)       
     beq $t1, $t0, x_read_complete  #NULL terminator found
@@ -167,6 +193,9 @@ lp_x:
 
 x_read_complete:
     move $s3, $a2
+    beq $t6, $zero, x_read_positive
+    sub $s3, $zero, $s3
+x_read_positive:
 
     # Enter next y-coordinate:
     li $v0, 4
@@ -184,6 +213,10 @@ x_read_complete:
     #parse the string and convert to integer
     lbu $t1, ($a0)
     beq $t1, $t0, error
+    li $t6, 0
+    bne $t1, $t7, lp_y
+    addi $a0, $a0, 1 
+    li $t6, 0
 lp_y:         
     lbu $t1, ($a0)       
     beq $t1, $t0, y_read_complete  #NULL terminator found
@@ -197,6 +230,9 @@ lp_y:
 
 y_read_complete:
     move $s4, $a2
+    beq $t6, $zero, y_read_positive
+    sub $s4, $zero, $s4
+y_read_positive:
 
     # Perform some computation
 
