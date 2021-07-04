@@ -33,8 +33,8 @@ First, the number of points to be given is taken as input. Then for each input p
 
 As each point is input, the area under this point and the last point is calculated. Depending on the location of the two points, the 4 major cases identified are reduced to only 2 cases and corresponding areas are computed: (the points are (x1 , y1 ) and (x2 , y2))
 
-1. y1 ∗ y2 ≥ 0 : Area = 1/ 2 ∗(x2 − x1)∗(|y1| + |y2|)
-2. y1 ∗ y2 < 0 : Area = 1/ 2 ∗(x2 − x1)∗(y1<sup>2</sup> + y2<sup>2</sup>) / (|y1| + |y2|)
+1. y<sub>1</sub> ∗ y<sub>2</sub> ≥ 0 : Area = 1/ 2 ∗(x<sub>2</sub> − x<sub>1</sub>)∗(|y<sub>1</sub>| + |y<sub>2</sub>|)
+2. y<sub>1</sub> ∗ y<sub>2</sub> < 0 : Area = 1/ 2 ∗(x<sub>2</sub> − x<sub>1</sub>)∗(y<sub>1</sub><sup>2</sup> + y<sub>2</sub><sup>2</sup>) / (|y<sub>1</sub>| + |y<sub>2</sub>|)
 
 The points are initially taken as integers and then converted to doubles using floating point registers. Subsequent calculations are performed using double arithmetic as multiplication of 32 bit coordinates can be 64 bit. A register stores the total area for multiple points, and after input of each point other than the first, the calculated new area is added to this.
 
