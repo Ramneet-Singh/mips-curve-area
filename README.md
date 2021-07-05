@@ -3,7 +3,7 @@
 ### Ramneet Singh | Mustafa Chasmai
 
 Abstract: MIPS Assembly Program for obtaining the area under a curve formed by joining successive points by a straight line.
-
+Course: Computer Architecture			Instructor: Prof. P. R. Panda
 ## Design Characteristics:
 
 ### 1. Error handling in Input
