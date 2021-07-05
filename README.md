@@ -2,8 +2,17 @@
 
 ### Ramneet Singh | Mustafa Chasmai
 
-Abstract: MIPS Assembly Program for obtaining the area under a curve formed by joining successive points by a straight line.
-Course: Computer Architecture			Instructor: Prof. P. R. Panda
+Abstract: MIPS Assembly Program for obtaining the area under a curve formed by joining successive points by a straight line.  
+Course: Computer Architecture &emsp; Instructor: Prof. P. R. Panda
+
+## Problem Statement:
+**Write a MIPS Assembly Program for obtaining the area under a curve formed by joining
+successive points by a straight line.**  
+  
+**Input**:  (x, y) Co-ordinates of n points, sorted according to the x co-ordinate. Assume
+integer values for the co-ordinates.  Inputs can be taken from keyboard.  
+**Output**: Print the area under the curve. The result can be a floating point value as well.
+
 ## Design Characteristics:
 
 ### 1. Error handling in Input
